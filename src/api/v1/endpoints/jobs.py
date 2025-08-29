@@ -11,6 +11,7 @@ from enum import Enum
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
 from pydantic import BaseModel, Field
 
+from src.models.jobs import JobStatus
 from src.services.job_service import JobService
 from src.core.dependencies import get_current_user, get_job_service
 from src.core.logging import get_logger
@@ -19,12 +20,6 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 # Enums and Models
-class JobStatus(str, Enum):
-    QUEUED = "queued"
-    ANALYZING = "analyzing" 
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
 
 class ProcessingStep(str, Enum):
     ANALYZING = "analyzing"
@@ -37,7 +32,7 @@ class ProcessingStep(str, Enum):
 
 class DocumentAnalysis(BaseModel):
     """Document analysis information."""
-    document_type: str = Field(..., regex="^(native|scanned|mixed)$")
+    document_type: str = Field(..., pattern="^(native|scanned|mixed)$")
     confidence: float = Field(..., ge=0.0, le=1.0)
     total_pages: int
     pages_with_text: int
@@ -305,7 +300,7 @@ async def retry_job(
 @router.get("/{job_id}/logs")
 async def get_job_logs(
     job_id: str = Path(..., description="Job ID to get logs for"),
-    log_level: Optional[str] = Query("info", regex="^(debug|info|warning|error)$"),
+    log_level: Optional[str] = Query("info", pattern="^(debug|info|warning|error)$"),
     limit: int = Query(default=100, ge=1, le=1000),
     current_user: dict = Depends(get_current_user)
 ):

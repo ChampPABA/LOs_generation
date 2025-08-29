@@ -163,7 +163,7 @@ class VectorService(BaseService):
     def _select_embedding_model(self, language: str) -> str:
         """Select appropriate embedding model based on language."""
         if language == "en":
-            return "qwen/qwen3-embedding-8b"
+            return "dengcao/Qwen3-Embedding-0.6B:F16"
         elif language == "th" or language == "mixed":
             return "bge-m3:latest"
         else:

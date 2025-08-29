@@ -1,11 +1,11 @@
 # Model Configuration - MVP Standardized
 embedding_models:
   english:
-    name: "qwen3-embed"
+    name: "dengcao-qwen3-embed"
     dimension: 1024
     language: "english"
     description: "English embedding model using Qwen3-Embedding-8B via Ollama"
-    ollama_model: "qwen/qwen3-embedding-8b"
+    ollama_model: "dengcao/Qwen3-Embedding-0.6B:F16"
     provider: "ollama"
     priority: 1
     
@@ -29,10 +29,10 @@ embedding_models:
 
 reranking_models:
   english:
-    name: "qwen3-reranker"
+    name: "dengcao-qwen3-reranker"
     language: "english"
     description: "English reranking model using Qwen3-Reranker-8B via Ollama"
-    ollama_model: "qwen/qwen3-reranker-8b"
+    ollama_model: "dengcao/Qwen3-Reranker-0.6B:F16"
     provider: "ollama"
     enabled: false  # Deferred to post-MVP but ready for implementation
     
@@ -80,10 +80,10 @@ language_detection:
   
   # Language-specific routing for MVP
   routing:
-    english: "qwen3-embed"
+    english: "dengcao-qwen3-embed"
     thai: "bge-m3"
     mixed: "bge-m3"
-    default: "qwen3-embed"
+    default: "dengcao-qwen3-embed"
 
 # MVP Model Selection Strategy
 model_strategy:
@@ -121,8 +121,8 @@ ollama:
   timeout: 30
   retry_attempts: 3
   models:
-    - "qwen/qwen3-embedding-8b"  # English embedding model
-    - "qwen/qwen3-reranker-8b"   # English reranking model
+    - "dengcao/Qwen3-Embedding-0.6B:F16"  # English embedding model
+    - "dengcao/Qwen3-Reranker-0.6B:F16"   # English reranking model
     - "bge-m3:latest"            # Thai/mixed language model
   
   # Health check configuration

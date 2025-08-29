@@ -142,8 +142,8 @@ async def get_rate_limit_status(
 
 @router.get("/usage-history")
 async def get_usage_history(
-    period: str = Query("24h", regex="^(1h|24h|7d|30d)$", description="Time period for usage history"),
-    granularity: str = Query("1h", regex="^(5m|1h|1d)$", description="Data granularity"),
+    period: str = Query("24h", pattern="^(1h|24h|7d|30d)$", description="Time period for usage history"),
+    granularity: str = Query("1h", pattern="^(5m|1h|1d)$", description="Data granularity"),
     current_user: dict = Depends(get_current_user)
 ):
     """
@@ -203,7 +203,7 @@ async def get_usage_history(
 
 @router.get("/cost-breakdown")
 async def get_cost_breakdown(
-    period: str = Query("24h", regex="^(24h|7d|30d)$"),
+    period: str = Query("24h", pattern="^(24h|7d|30d)$"),
     current_user: dict = Depends(get_current_user)
 ):
     """

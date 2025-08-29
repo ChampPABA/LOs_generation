@@ -71,7 +71,7 @@ This system addresses the critical gap in Thai entrance exams (TBAT) where only 
 5. **Pull required AI models**:
    ```bash
    # This may take several minutes
-   docker exec -it los_generation-ollama-1 ollama pull qwen/qwen3-embedding-8b
+   docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Embedding-0.6B:F16
    docker exec -it los_generation-ollama-1 ollama pull bge-m3:latest
    ```
 

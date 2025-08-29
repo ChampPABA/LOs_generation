@@ -34,9 +34,9 @@ top_k_retrieval: 10
 
 # Model configuration
 default_embedding_model: "bge-m3"
-english_embedding_model: "qwen/qwen3-embedding-8b"
+english_embedding_model: "dengcao/Qwen3-Embedding-0.6B:F16"
 thai_reranker_model: "bge-reranker-v2-m3"
-english_reranker_model: "qwen/qwen3-reranker-8b"
+english_reranker_model: "dengcao/Qwen3-Reranker-0.6B:F16"
 
 # Directory paths (relative to project root)
 config_dir: "configs"

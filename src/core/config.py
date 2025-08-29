@@ -62,9 +62,9 @@ class Settings(BaseSettings):
     
     # Model Configuration (Fixed according to approved config)
     default_embedding_model: str = Field(default="bge-m3", env="DEFAULT_EMBEDDING_MODEL")
-    english_embedding_model: str = Field(default="qwen/qwen3-embedding-8b", env="ENGLISH_EMBEDDING_MODEL")
+    english_embedding_model: str = Field(default="dengcao/Qwen3-Embedding-0.6B:F16", env="ENGLISH_EMBEDDING_MODEL")
     thai_reranker_model: str = Field(default="bge-reranker-v2-m3", env="THAI_RERANKER_MODEL")
-    english_reranker_model: str = Field(default="qwen/qwen3-reranker-8b", env="ENGLISH_RERANKER_MODEL")
+    english_reranker_model: str = Field(default="dengcao/Qwen3-Reranker-0.6B:F16", env="ENGLISH_RERANKER_MODEL")
     
     # File Paths
     config_dir: str = Field(default="configs", env="CONFIG_DIR")

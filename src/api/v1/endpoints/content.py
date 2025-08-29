@@ -24,7 +24,7 @@ router = APIRouter()
 # Request/Response Models
 class ProcessingPreferences(BaseModel):
     """Processing preferences for hybrid chunking."""
-    force_processing_path: Optional[str] = Field("auto", regex="^(auto|structural|ocr_agentic)$")
+    force_processing_path: Optional[str] = Field("auto", pattern="^(auto|structural|ocr_agentic)$")
     ocr_languages: List[str] = Field(default=["eng", "tha"])
     ocr_confidence_threshold: float = Field(default=0.6, ge=0.0, le=1.0)
     image_preprocessing: bool = Field(default=True)
@@ -53,7 +53,7 @@ class GenerationConfig(BaseModel):
 
 class ProcessingPreferences(BaseModel):
     """Processing preferences for hybrid chunking."""
-    force_processing_path: Optional[str] = Field("auto", regex="^(auto|structural|ocr_agentic)$")
+    force_processing_path: Optional[str] = Field("auto", pattern="^(auto|structural|ocr_agentic)$")
     chunk_size: int = Field(default=500, ge=100, le=2000)
     overlap_size: int = Field(default=50, ge=0, le=500)
     ocr_languages: List[str] = Field(default=["eng", "tha"])
@@ -69,7 +69,7 @@ class ProcessingPreferences(BaseModel):
 
 class GenerateLOsRequest(BaseModel):
     """Request model for learning objectives generation."""
-    content_type: str = Field(regex="^(direct_text|pdf_upload|textbook_id)$")
+    content_type: str = Field(pattern="^(direct_text|pdf_upload|textbook_id)$")
     content: Optional[str] = Field(None)
     textbook_id: Optional[int] = Field(None)
     file_path: Optional[str] = Field(None)  # For PDF upload processing

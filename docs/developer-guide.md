@@ -49,7 +49,7 @@ poetry run alembic upgrade head
 
 ```bash
 # Pull embedding models (may take time)
-docker exec -it los_generation-ollama-1 ollama pull qwen/qwen3-embedding-8b
+docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Embedding-0.6B:F16
 docker exec -it los_generation-ollama-1 ollama pull bge-m3:latest
 ```
 
@@ -211,8 +211,8 @@ Edit `configs/models.yaml`:
 ```yaml
 embedding_models:
   english:
-    name: "qwen3-embed"
-    ollama_model: "qwen/qwen3-embedding-8b"
+    name: "dengcao-qwen3-embed"
+    ollama_model: "dengcao/Qwen3-Embedding-0.6B:F16"
     dimension: 1024
   thai:
     name: "bge-m3"
@@ -261,7 +261,7 @@ curl http://localhost:11434/api/tags  # Ollama
 docker exec -it los_generation-ollama-1 ollama list
 
 # Pull missing models
-docker exec -it los_generation-ollama-1 ollama pull qwen/qwen3-embedding-8b
+docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Embedding-0.6B:F16
 ```
 
 #### 3. Database Connection Issues

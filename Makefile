@@ -109,8 +109,8 @@ deploy-prod:
 models-pull:
 	@echo "Pulling Ollama models..."
 	ollama pull bge-m3:latest
-	ollama pull qwen/qwen3-embedding-8b
-	ollama pull qwen/qwen3-reranker-8b
+	ollama pull dengcao/Qwen3-Embedding-0.6B:F16
+	ollama pull dengcao/Qwen3-Reranker-0.6B:F16
 	ollama pull bge-reranker-v2-m3:latest
 
 # Development helpers

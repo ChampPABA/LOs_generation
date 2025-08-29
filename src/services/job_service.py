@@ -17,7 +17,7 @@ from ..tasks.celery_app import celery_app
 from ..tasks import processing_tasks, ocr_tasks, generation_tasks
 from ..core.logging import get_logger
 from ..database.connection import get_async_session
-from ..models.learning_objectives import JobStatus
+from ..models.jobs import JobStatus
 
 logger = get_logger(__name__)
 

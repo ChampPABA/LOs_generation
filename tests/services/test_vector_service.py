@@ -55,7 +55,7 @@ class TestVectorService:
         
         # Test English model selection
         english_model = service._select_embedding_model("en")
-        assert english_model == "qwen/qwen3-embedding-8b"
+        assert english_model == "dengcao/Qwen3-Embedding-0.6B:F16"
         
         # Test Thai model selection
         thai_model = service._select_embedding_model("th")

@@ -16,7 +16,16 @@
       "Bash(alembic revision:*)",
       "Read(C:\\Users/**)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(poetry --version)",
+      "Bash(py --version)",
+      "Bash(export:*)",
+      "Bash(poetry install:*)",
+      "Bash(poetry run alembic:*)",
+      "Bash(poetry lock:*)",
+      "Bash(alembic upgrade:*)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "ask": []
