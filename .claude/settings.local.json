@@ -25,7 +25,19 @@
       "Bash(poetry run alembic:*)",
       "Bash(poetry lock:*)",
       "Bash(alembic upgrade:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(curl:*)",
+      "Bash(redis-cli:*)",
+      "Bash(py -m pip install:*)",
+      "Bash(py -m poetry:*)",
+      "Bash(\"C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\poetry.exe\" --version)",
+      "Bash(\"C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python313\\Scripts\\poetry.exe\" install)",
+      "Bash(where py)",
+      "Bash(copy \".env.example\" \".env\")",
+      "Bash(py -m alembic upgrade:*)",
+      "Bash(py:*)",
+      "Bash(\"C:\\Users\\User\\AppData\\Roaming\\Python\\Scripts\\poetry.exe\" --version)",
+      "Bash(\"C:\\Users\\User\\AppData\\Roaming\\Python\\Scripts\\poetry.exe\" install)"
     ],
     "deny": [],
     "ask": []

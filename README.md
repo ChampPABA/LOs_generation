@@ -15,7 +15,7 @@ This system addresses the critical gap in Thai entrance exams (TBAT) where only 
 ### MVP Core Components
 
 - **Simplified RAG Pipeline**: Structural chunking strategy with vector similarity search
-- **Language-Specific Support**: Qwen3-Embedding-8B for English, bge-m3 for Thai/multilingual content
+- **Language-Specific Support**: Qwen3-Embedding-0.6B for English, bge-m3 for Thai/multilingual content, with reranking models
 - **Basic LO Generation**: Gemini 2.5 Pro + Pydantic AI integration
 - **Automated Quality Scoring**: Relevance, clarity, structure, and length metrics
 - **Required Observability**: Langfuse integration for comprehensive LLM tracking and monitoring
@@ -70,9 +70,11 @@ This system addresses the critical gap in Thai entrance exams (TBAT) where only 
 
 5. **Pull required AI models**:
    ```bash
-   # This may take several minutes
+   # This may take several minutes (total ~4.8GB)
    docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Embedding-0.6B:F16
    docker exec -it los_generation-ollama-1 ollama pull bge-m3:latest
+   docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Reranker-0.6B:F16
+   docker exec -it los_generation-ollama-1 ollama pull xitao/bge-reranker-v2-m3:latest
    ```
 
 6. **Start the application**:
@@ -276,7 +278,8 @@ DEFAULT_RATE_LIMIT=50
 ### Model Configuration
 
 Edit `configs/models.yaml` to adjust:
-- Embedding model selection (Qwen3-8B for English, bge-m3 for Thai)
+- Embedding model selection (Qwen3-0.6B for English, bge-m3 for Thai)
+- Reranker model selection (Qwen3-Reranker-0.6B, bge-reranker-v2-m3)
 - Language detection thresholds
 - Basic model routing rules
 

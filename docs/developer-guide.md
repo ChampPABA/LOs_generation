@@ -48,9 +48,11 @@ poetry run alembic upgrade head
 ### 4. Pull Required Models
 
 ```bash
-# Pull embedding models (may take time)
+# Pull all required models (may take time - total ~4.8GB)
 docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Embedding-0.6B:F16
 docker exec -it los_generation-ollama-1 ollama pull bge-m3:latest
+docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Reranker-0.6B:F16
+docker exec -it los_generation-ollama-1 ollama pull xitao/bge-reranker-v2-m3:latest
 ```
 
 ### 5. Start Development Server

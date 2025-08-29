@@ -111,7 +111,7 @@ async def setup_ollama_models():
         "bge-m3:latest",
         "dengcao/Qwen3-Embedding-0.6B:F16",
         "dengcao/Qwen3-Reranker-0.6B:F16",
-        "bge-reranker-v2-m3:latest"
+        "xitao/bge-reranker-v2-m3:latest"
     ]
     
     for model in models:
@@ -210,7 +210,11 @@ async def main():
     logger.info("1. Update .env file with your configuration")
     logger.info("2. Start services: docker-compose up -d")
     logger.info("3. Run database migrations: poetry run alembic upgrade head")
-    logger.info("4. Pull Ollama models: ollama pull bge-m3 && ollama pull dengcao/Qwen3-Embedding-0.6B:F16")
+    logger.info("4. Pull Ollama models:")
+    logger.info("   docker exec -it los_generation-ollama-1 ollama pull bge-m3:latest")
+    logger.info("   docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Embedding-0.6B:F16")
+    logger.info("   docker exec -it los_generation-ollama-1 ollama pull dengcao/Qwen3-Reranker-0.6B:F16")
+    logger.info("   docker exec -it los_generation-ollama-1 ollama pull xitao/bge-reranker-v2-m3:latest")
     logger.info("5. Start the application: poetry run uvicorn src.main:app --reload")
     
     return True

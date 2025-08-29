@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr-eng \
     tesseract-ocr-tha \
     libtesseract-dev \
-    libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
@@ -25,6 +24,8 @@ RUN apt-get update && apt-get install -y \
     libgomp1 \
     libgthread-2.0-0 \
     poppler-utils \
+    libgl1-mesa-dev \
+    libgles2-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
@@ -35,7 +36,7 @@ COPY pyproject.toml poetry.lock* ./
 
 # Configure poetry and install dependencies
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+    && poetry install --only=main --no-root --no-interaction --no-ansi
 
 # Copy project
 COPY . .
