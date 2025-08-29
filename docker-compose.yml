@@ -1,0 +1,192 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: los_generation
+      POSTGRES_USER: los_user
+      POSTGRES_PASSWORD: los_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U los_user -d los_generation"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery and Caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:v1.7.0
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Ollama for Local Model Serving
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Main FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://los_user:los_password@postgres:5432/los_generation
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_URL: http://ollama:11434
+      ENVIRONMENT: development
+      # OCR Configuration
+      TESSERACT_PATH: /usr/bin/tesseract
+      TESSERACT_DATA_PATH: /usr/share/tesseract-ocr/4.00/tessdata
+      OCR_LANGUAGES: eng,tha
+      OCR_TEMP_DIR: /tmp/ocr
+      OCR_MAX_CONCURRENT_PAGES: 3
+      OCR_PROCESSING_TIMEOUT: 180
+      # Hybrid Chunking Settings
+      CHUNK_SIZE: 500
+      OVERLAP_SIZE: 50
+      PARENT_CHUNK_SIZE: 1000
+      CHILD_CHUNK_SIZE: 300
+    volumes:
+      - ./configs:/app/configs
+      - ./input_data:/app/input_data
+      - ./output_data:/app/output_data
+      - ./uploads:/app/uploads
+      - ./processed:/app/processed
+      - ocr_temp:/tmp/ocr
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A src.tasks.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      DATABASE_URL: postgresql+asyncpg://los_user:los_password@postgres:5432/los_generation
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_URL: http://ollama:11434
+      ENVIRONMENT: development
+      # OCR Configuration for Celery workers
+      TESSERACT_PATH: /usr/bin/tesseract
+      TESSERACT_DATA_PATH: /usr/share/tesseract-ocr/4.00/tessdata
+      OCR_LANGUAGES: eng,tha
+      OCR_TEMP_DIR: /tmp/ocr
+      OCR_MAX_CONCURRENT_PAGES: 2
+    volumes:
+      - ./configs:/app/configs
+      - ./input_data:/app/input_data
+      - ./output_data:/app/output_data
+      - ./uploads:/app/uploads
+      - ./processed:/app/processed
+      - ocr_temp:/tmp/ocr
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+      - ollama
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A src.tasks.celery_app beat --loglevel=info --scheduler=celery.schedulers:DatabaseScheduler
+    environment:
+      DATABASE_URL: postgresql+asyncpg://los_user:los_password@postgres:5432/los_generation
+      REDIS_URL: redis://redis:6379/0
+      ENVIRONMENT: development
+    depends_on:
+      - postgres
+      - redis
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  # Grafana for Visualization
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+  ollama_data:
+  prometheus_data:
+  grafana_data:
+  ocr_temp:  # Shared volume for OCR temporary files

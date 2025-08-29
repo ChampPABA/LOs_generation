@@ -1,0 +1,529 @@
+openapi: 3.0.0
+info:
+  title: Learning Objectives Generation API - Hybrid Chunking
+  version: 1.1.0
+  description: Enhanced REST API supporting both native and scanned PDF processing through hybrid chunking pipeline
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: https://api.los-generation.example.com/api/v1
+    description: Production server
+
+paths:
+  /generate-los:
+    post:
+      summary: Generate learning objectives with hybrid chunking support
+      description: |
+        Initiates background processing to generate LOs from provided content. 
+        System automatically detects document type (native vs scanned) and routes 
+        through appropriate processing path.
+      tags:
+        - Generation
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content_type:
+                  type: string
+                  enum: [direct_text, pdf_upload, textbook_id]
+                content:
+                  type: string
+                  description: Direct text content (if content_type is direct_text)
+                textbook_id:
+                  type: integer
+                  description: ID of existing textbook (if content_type is textbook_id)
+                topic_id:
+                  type: integer
+                  description: Target topic for LO generation
+                processing_preferences:
+                  type: object
+                  description: Processing preferences for hybrid chunking
+                  properties:
+                    force_processing_path:
+                      type: string
+                      enum: [auto, structural, ocr_agentic]
+                      default: auto
+                      description: Force specific processing path (auto = automatic detection)
+                    ocr_languages:
+                      type: array
+                      items:
+                        type: string
+                      default: ["eng", "tha"]
+                      description: Languages for OCR processing
+                    ocr_confidence_threshold:
+                      type: number
+                      minimum: 0.0
+                      maximum: 1.0
+                      default: 0.6
+                      description: Minimum OCR confidence threshold
+                    image_preprocessing:
+                      type: boolean
+                      default: true
+                      description: Enable image preprocessing for better OCR results
+                generation_config:
+                  type: object
+                  properties:
+                    max_los_per_chunk:
+                      type: integer
+                      default: 3
+                    min_quality_score:
+                      type: number
+                      default: 0.8
+                    bloom_levels:
+                      type: array
+                      items:
+                        type: integer
+                      description: Target Bloom taxonomy levels (1-6)
+              required:
+                - content_type
+                - topic_id
+      responses:
+        '202':
+          description: Generation job accepted and queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [queued]
+                  processing_path:
+                    type: string
+                    enum: [structural, ocr_agentic, pending_analysis]
+                    description: Detected or planned processing path
+                  estimated_completion:
+                    type: string
+                    format: date-time
+                  cost_estimate:
+                    type: object
+                    properties:
+                      estimated_tokens:
+                        type: integer
+                        description: Estimated API tokens for OCR processing
+                      estimated_cost_usd:
+                        type: number
+                        description: Estimated cost in USD
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [invalid_content_type, unsupported_language, file_too_large]
+                      message:
+                        type: string
+                      details:
+                        type: object
+
+  /jobs/{job_id}/status:
+    get:
+      summary: Get enhanced job processing status with hybrid chunking details
+      description: Returns detailed status including processing path and OCR-specific metrics
+      tags:
+        - Jobs
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Enhanced job status with hybrid processing details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [queued, analyzing, processing, completed, failed]
+                  processing_path:
+                    type: string
+                    enum: [structural, ocr_agentic]
+                    description: Active processing path
+                  document_analysis:
+                    type: object
+                    properties:
+                      document_type:
+                        type: string
+                        enum: [native, scanned, mixed]
+                      confidence:
+                        type: number
+                        description: Confidence in document type detection
+                      total_pages:
+                        type: integer
+                      pages_with_text:
+                        type: integer
+                      pages_requiring_ocr:
+                        type: integer
+                  progress:
+                    type: object
+                    properties:
+                      current_step:
+                        type: string
+                        enum: [analyzing, chunking, ocr_processing, agentic_chunking, vectorizing, generating, validating]
+                      completion_percentage:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                      processed_pages:
+                        type: integer
+                      total_pages:
+                        type: integer
+                      ocr_metrics:
+                        type: object
+                        properties:
+                          pages_processed:
+                            type: integer
+                          average_confidence:
+                            type: number
+                          low_confidence_pages:
+                            type: integer
+                          preprocessing_applied:
+                            type: boolean
+                      agentic_chunking_metrics:
+                        type: object
+                        properties:
+                          tokens_used:
+                            type: integer
+                          api_calls_made:
+                            type: integer
+                          average_chunk_quality:
+                            type: number
+                          retry_count:
+                            type: integer
+                  cost_tracking:
+                    type: object
+                    properties:
+                      tokens_consumed:
+                        type: integer
+                      api_calls_made:
+                        type: integer
+                      estimated_cost_usd:
+                        type: number
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  completed_at:
+                    type: string
+                    format: date-time
+                  error_message:
+                    type: string
+                  fallback_info:
+                    type: object
+                    description: Information about fallback processing if occurred
+                    properties:
+                      original_path:
+                        type: string
+                      fallback_path:
+                        type: string
+                      fallback_reason:
+                        type: string
+
+  /jobs/{job_id}/processing-details:
+    get:
+      summary: Get detailed processing information for hybrid chunking analysis
+      description: Returns detailed information about document analysis and processing decisions
+      tags:
+        - Jobs
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detailed processing information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  document_analysis:
+                    type: object
+                    properties:
+                      file_info:
+                        type: object
+                        properties:
+                          file_size_bytes:
+                            type: integer
+                          total_pages:
+                            type: integer
+                          pdf_version:
+                            type: string
+                      page_analysis:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            page_number:
+                              type: integer
+                            has_text:
+                              type: boolean
+                            text_density:
+                              type: number
+                            requires_ocr:
+                              type: boolean
+                            ocr_confidence:
+                              type: number
+                            processing_time_ms:
+                              type: integer
+                      processing_decision:
+                        type: object
+                        properties:
+                          chosen_path:
+                            type: string
+                          confidence:
+                            type: number
+                          decision_factors:
+                            type: array
+                            items:
+                              type: string
+                  chunking_results:
+                    type: object
+                    properties:
+                      total_parent_chunks:
+                        type: integer
+                      total_child_chunks:
+                        type: integer
+                      average_parent_chunk_size:
+                        type: integer
+                      average_child_chunk_size:
+                        type: integer
+                      quality_scores:
+                        type: object
+                        properties:
+                          coverage:
+                            type: number
+                          coherence:
+                            type: number
+                          completeness:
+                            type: number
+
+  /documents/{document_id}/analysis:
+    get:
+      summary: Get document analysis results
+      description: Returns the analysis results for a processed document
+      tags:
+        - Documents
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Document analysis results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document_id:
+                    type: integer
+                  document_type:
+                    type: string
+                    enum: [native, scanned, mixed]
+                  processing_path:
+                    type: string
+                    enum: [structural, ocr_agentic]
+                  quality_metrics:
+                    type: object
+                    properties:
+                      ocr_confidence:
+                        type: number
+                      text_extraction_quality:
+                        type: number
+                      chunking_quality:
+                        type: number
+                  page_details:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        page_number:
+                          type: integer
+                        processing_method:
+                          type: string
+                        ocr_confidence:
+                          type: number
+                        text_length:
+                          type: integer
+                        chunk_count:
+                          type: integer
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    ProcessingPreferences:
+      type: object
+      properties:
+        force_processing_path:
+          type: string
+          enum: [auto, structural, ocr_agentic]
+          default: auto
+        ocr_languages:
+          type: array
+          items:
+            type: string
+          default: ["eng", "tha"]
+        ocr_confidence_threshold:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+          default: 0.6
+        image_preprocessing:
+          type: boolean
+          default: true
+
+    DocumentAnalysis:
+      type: object
+      properties:
+        document_type:
+          type: string
+          enum: [native, scanned, mixed]
+        confidence:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+        total_pages:
+          type: integer
+        pages_with_text:
+          type: integer
+        pages_requiring_ocr:
+          type: integer
+        analysis_method:
+          type: string
+          description: Method used for document type detection
+
+    OCRMetrics:
+      type: object
+      properties:
+        pages_processed:
+          type: integer
+        average_confidence:
+          type: number
+        low_confidence_pages:
+          type: integer
+        preprocessing_applied:
+          type: boolean
+        total_processing_time_ms:
+          type: integer
+        language_detection_results:
+          type: object
+          additionalProperties:
+            type: number
+
+    AgenticChunkingMetrics:
+      type: object
+      properties:
+        tokens_used:
+          type: integer
+        api_calls_made:
+          type: integer
+        average_chunk_quality:
+          type: number
+        retry_count:
+          type: integer
+        fallback_to_simple_splitting:
+          type: boolean
+        processing_time_ms:
+          type: integer
+
+    CostTracking:
+      type: object
+      properties:
+        tokens_consumed:
+          type: integer
+        api_calls_made:
+          type: integer
+        estimated_cost_usd:
+          type: number
+        cost_breakdown:
+          type: object
+          properties:
+            ocr_processing:
+              type: number
+            agentic_chunking:
+              type: number
+            vector_embeddings:
+              type: number
+
+    HybridJobStatus:
+      type: object
+      properties:
+        job_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [queued, analyzing, processing, completed, failed]
+        processing_path:
+          type: string
+          enum: [structural, ocr_agentic]
+        document_analysis:
+          $ref: '#/components/schemas/DocumentAnalysis'
+        progress:
+          type: object
+        cost_tracking:
+          $ref: '#/components/schemas/CostTracking'
+        error_message:
+          type: string
+        fallback_info:
+          type: object
+          properties:
+            original_path:
+              type: string
+            fallback_path:
+              type: string
+            fallback_reason:
+              type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time

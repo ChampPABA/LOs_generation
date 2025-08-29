@@ -1,0 +1,22 @@
+# LOs_Generation Product Requirements Document (PRD)
+
+## Table of Contents
+
+- [LOs_Generation Product Requirements Document (PRD)](#table-of-contents)
+  - [Goals and Background Context](./goals-and-background-context.md)
+    - [Goals](./goals-and-background-context.md#goals)
+    - [Background Context](./goals-and-background-context.md#background-context)
+    - [Change Log](./goals-and-background-context.md#change-log)
+  - [Requirements](./requirements.md)
+    - [Functional Requirements](./requirements.md#functional-requirements)
+    - [Non-Functional Requirements](./requirements.md#non-functional-requirements)
+  - [Technical Assumptions](./technical-assumptions.md)
+    - [Repository Structure: Monorepo](./technical-assumptions.md#repository-structure-monorepo)
+    - [Service Architecture](./technical-assumptions.md#service-architecture)
+    - [Testing Requirements](./technical-assumptions.md#testing-requirements)
+    - [Additional Technical Assumptions and Requests](./technical-assumptions.md#additional-technical-assumptions-and-requests)
+  - [Epic List](./epic-list.md)
+  - [MVP Success Criteria (Revised)](./mvp-success-criteria-revised.md)
+    - [Core Deliverables](./mvp-success-criteria-revised.md#core-deliverables)
+    - [Quality Metrics](./mvp-success-criteria-revised.md#quality-metrics)
+    - [Post-MVP Roadmap](./mvp-success-criteria-revised.md#post-mvp-roadmap)

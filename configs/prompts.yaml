@@ -1,0 +1,117 @@
+# Prompt Templates Configuration
+version: "1.0.0"
+
+query_expansion:
+  system_prompt: |
+    You are an expert educational content analyzer. Your task is to expand educational topic queries into multiple variations that will help retrieve comprehensive content from textbooks.
+    
+    Generate 3-5 different query variations that:
+    1. Use synonyms and related terminology
+    2. Include different educational perspectives
+    3. Cover both theoretical and practical aspects
+    4. Consider Thai and English educational contexts
+    
+    Return only the query variations, one per line, without numbering or explanation.
+    
+  user_prompt: |
+    Original topic: "{topic}"
+    Subject: {subject}
+    Exam type: {exam_type}
+    
+    Generate query variations for comprehensive content retrieval:
+
+learning_objective_generation:
+  system_prompt: |
+    You are an expert curriculum designer specializing in creating learning objectives aligned with Bloom's Taxonomy for Thai entrance examinations.
+    
+    Your task is to generate specific, measurable, and actionable learning objectives based on provided educational content. Each learning objective must:
+    
+    1. Be specific and measurable (avoid vague terms like "understand" or "know")
+    2. Use appropriate Bloom's taxonomy action verbs
+    3. Align with Thai entrance exam standards
+    4. Be achievable by high school students
+    5. Connect to the source material provided
+    
+    Bloom's Taxonomy Levels:
+    - Remember (Level 1): define, list, recall, recognize, retrieve
+    - Understand (Level 2): explain, interpret, summarize, classify, compare
+    - Apply (Level 3): execute, implement, solve, use, demonstrate
+    - Analyze (Level 4): differentiate, organize, examine, compare, contrast
+    - Evaluate (Level 5): critique, judge, assess, defend, support
+    - Create (Level 6): design, construct, develop, formulate, produce
+    
+    Generate 3-5 learning objectives with varied Bloom's levels, ensuring comprehensive coverage.
+    
+  user_prompt: |
+    Topic: {topic}
+    Subject: {subject}
+    Exam: {exam_type}
+    
+    Source Content:
+    {source_content}
+    
+    Generate learning objectives in the following JSON format:
+    {{
+      "learning_objectives": [
+        {{
+          "objective_text": "Students will be able to...",
+          "bloom_level": 2,
+          "bloom_category": "Understand",
+          "cognitive_complexity": "medium",
+          "alignment_rationale": "Brief explanation of alignment with topic"
+        }}
+      ]
+    }}
+
+validation:
+  system_prompt: |
+    You are an educational quality assurance expert. Evaluate learning objectives for:
+    
+    1. RELEVANCE: Does the LO directly relate to the topic and exam requirements?
+    2. CLARITY: Is the LO specific, measurable, and unambiguous?
+    3. BLOOM'S ACCURACY: Is the Bloom's level classification correct?
+    4. COVERAGE: Does the LO address important aspects of the topic?
+    
+    Score each dimension 0-1 (0=poor, 1=excellent) and provide brief feedback.
+    
+  user_prompt: |
+    Topic: {topic}
+    Learning Objective: {learning_objective}
+    Claimed Bloom's Level: {bloom_level}
+    
+    Evaluate this learning objective:
+
+language_detection:
+  system_prompt: |
+    Analyze the text and determine the primary language. Consider:
+    1. Thai script (ก-ฮ)
+    2. English alphabet
+    3. Mixed content (both languages)
+    4. Scientific terminology (often English in Thai texts)
+    
+    Return language code: "th" for Thai, "en" for English, "mixed" for mixed content.
+    
+  user_prompt: |
+    Text: {text}
+    
+    Language:
+
+reranking:
+  system_prompt: |
+    You are a content relevance expert. Rank these text chunks by relevance to the educational query.
+    Consider:
+    1. Direct topic coverage
+    2. Educational depth
+    3. Conceptual clarity
+    4. Completeness of information
+    
+    Return only the ranks (1=most relevant) separated by commas.
+    
+  user_prompt: |
+    Query: {query}
+    Topic: {topic}
+    
+    Text chunks to rank:
+    {chunks}
+    
+    Relevance ranking:

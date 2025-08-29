@@ -1,0 +1,76 @@
+schema: 1
+story: "2.5"
+story_title: "Multi-language Model Integration"
+gate: "CONCERNS"
+status_reason: "Critical risks identified in model integration and language detection that require immediate attention before production deployment."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-01-27T10:30:00Z"
+
+waiver: { active: false }
+
+top_issues:
+  - id: "TECH-001"
+    severity: high
+    finding: "Model performance inconsistency between bge-m3 and Qwen3 embedding models may cause retrieval accuracy issues"
+    suggested_action: "Implement comprehensive cross-model validation testing and standardized evaluation datasets"
+  - id: "TECH-002"
+    severity: high
+    finding: "Language detection accuracy for mixed Thai-English educational content lacks confidence scoring and fallback strategies"
+    suggested_action: "Add multi-level language detection with confidence thresholds and graceful degradation"
+  - id: "OPS-001"
+    severity: high
+    finding: "Ollama model loading and initialization failures could render system non-functional"
+    suggested_action: "Implement robust model health checks, recovery procedures, and monitoring"
+  - id: "PERF-001"
+    severity: medium
+    finding: "Model switching overhead may significantly impact system throughput and response times"
+    suggested_action: "Add model caching, connection pooling, and performance monitoring"
+
+risk_summary:
+  totals:
+    critical: 3
+    high: 4
+    medium: 3
+    low: 2
+  highest:
+    id: TECH-001
+    score: 9
+    title: 'Model Performance Inconsistency'
+  recommendations:
+    must_fix:
+      - 'Implement cross-model validation testing with educational content'
+      - 'Add robust language detection with confidence scoring'
+      - 'Setup model health monitoring and failure recovery'
+    monitor:
+      - 'Track model switching performance overhead'
+      - 'Monitor embedding consistency across language types'
+      - 'Alert on language detection accuracy degradation'
+
+quality_score: 25
+
+evidence:
+  tests_reviewed: 0
+  risks_identified: 12
+  trace:
+    ac_covered: []
+    ac_gaps: [1, 2, 3, 4, 5, 6, 7]
+
+nfr_validation:
+  security: { status: CONCERNS, notes: "Ollama API security requires validation" }
+  performance: { status: FAIL, notes: "Model switching overhead not validated" }
+  reliability: { status: CONCERNS, notes: "Model failure recovery not implemented" }
+  maintainability: { status: PASS, notes: "Model version management designed" }
+
+recommendations:
+  immediate:
+    - action: "Create cross-model validation test suite with educational content samples"
+      refs: ["tests/models/", "validation/cross_model_test.py"]
+    - action: "Implement multi-level language detection with confidence scoring"
+      refs: ["src/language/detection.py", "config/language_thresholds.yaml"]
+    - action: "Setup Ollama model health monitoring and automatic recovery"
+      refs: ["src/models/health.py", "monitoring/model_status.py"]
+  future:
+    - action: "Consider model performance optimization and caching strategies"
+      refs: ["src/models/cache.py", "performance/model_optimization.py"]
+    - action: "Evaluate alternative Thai language models for better quality"
+      refs: ["research/thai_models_evaluation.md"]

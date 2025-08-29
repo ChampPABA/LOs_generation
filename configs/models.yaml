@@ -1,0 +1,154 @@
+# Model Configuration - MVP Standardized
+embedding_models:
+  english:
+    name: "qwen3-embed"
+    dimension: 1024
+    language: "english"
+    description: "English embedding model using Qwen3-Embedding-8B via Ollama"
+    ollama_model: "qwen/qwen3-embedding-8b"
+    provider: "ollama"
+    priority: 1
+    
+  thai:
+    name: "bge-m3"
+    dimension: 1024
+    language: "thai" 
+    description: "Thai embedding model using bge-m3"
+    ollama_model: "bge-m3:latest"
+    provider: "ollama"
+    priority: 1
+    
+  mixed:
+    name: "bge-m3"
+    dimension: 1024
+    language: "multilingual"
+    description: "Mixed language embedding using bge-m3"
+    ollama_model: "bge-m3:latest"
+    provider: "ollama"
+    priority: 1
+
+reranking_models:
+  english:
+    name: "qwen3-reranker"
+    language: "english"
+    description: "English reranking model using Qwen3-Reranker-8B via Ollama"
+    ollama_model: "qwen/qwen3-reranker-8b"
+    provider: "ollama"
+    enabled: false  # Deferred to post-MVP but ready for implementation
+    
+  thai:
+    name: "bge-reranker-v2-m3"
+    language: "thai"
+    description: "Thai reranking model using bge-reranker-v2-m3"
+    ollama_model: "bge-reranker-v2-m3:latest"
+    provider: "ollama"
+    enabled: false  # Deferred to post-MVP
+    
+  mixed:
+    name: "bge-reranker-v2-m3"
+    language: "multilingual"
+    description: "Mixed language reranking using bge-reranker-v2-m3"
+    ollama_model: "bge-reranker-v2-m3:latest"
+    provider: "ollama"
+    enabled: false  # Deferred to post-MVP
+
+  # Note: Language-specific reranking ready for post-MVP
+
+generation_models:
+  primary:
+    name: "gemini-2.5-pro"
+    provider: "google"
+    description: "Primary LLM for complex LO generation tasks"
+    max_tokens: 2000000
+    temperature: 0.7
+    top_p: 0.9
+    
+  secondary:
+    name: "gemini-2.5-flash"
+    provider: "google"
+    description: "Fast LLM for quality scoring and validation"
+    max_tokens: 1000000
+    temperature: 0.3
+    top_p: 0.8
+
+# MVP Language Configuration - English First
+language_detection:
+  threshold: 0.7  # Relaxed threshold for MVP
+  default_language: "en"
+  primary_language: "en"  # MVP focuses on English content
+  supported_languages: ["en", "th"]
+  
+  # Language-specific routing for MVP
+  routing:
+    english: "qwen3-embed"
+    thai: "bge-m3"
+    mixed: "bge-m3"
+    default: "qwen3-embed"
+
+# MVP Model Selection Strategy
+model_strategy:
+  embedding: "language_specific"  # English: Qwen3, Thai: bge-m3
+  chunking: "structural"  # Structural chunking using MarkdownHeaderTextSplitter
+  retrieval: "vector_similarity"  # Basic vector search only
+  reranking: "disabled"  # Post-MVP feature (language-specific ready)
+  generation: "gemini-2.5-pro"  # Gemini for generation
+  validation: "gemini-2.5-flash"  # Gemini Flash for quality scoring
+
+# Quality Scoring Configuration
+quality_scoring:
+  metrics:
+    relevance:
+      weight: 0.3
+      model: "gemini-2.5-flash"
+    clarity:
+      weight: 0.3
+      model: "gemini-2.5-flash"
+    structure:
+      weight: 0.2
+      model: "gemini-2.5-flash"
+    length:
+      weight: 0.2
+      model: "automated"  # Simple length validation
+  
+  thresholds:
+    pass: 0.8  # 80% minimum score
+    excellent: 0.9
+    needs_review: 0.6  # Below this requires attention
+
+# Ollama Configuration for Local Models
+ollama:
+  base_url: "http://localhost:11434"
+  timeout: 30
+  retry_attempts: 3
+  models:
+    - "qwen/qwen3-embedding-8b"  # English embedding model
+    - "qwen/qwen3-reranker-8b"   # English reranking model
+    - "bge-m3:latest"            # Thai/mixed language model
+  
+  # Health check configuration
+  health_check:
+    enabled: true
+    interval: 60  # seconds
+    timeout: 10
+
+# Post-MVP Features (Disabled for MVP)
+advanced_features:
+  late_chunking: false
+  rag_fusion: false
+  hybrid_search: false
+  multi_language_optimization: false
+  human_review_integration: false
+  langfuse_observability: true  # Required for MVP LLM observability
+
+# MVP Development Notes  
+mvp_notes: |
+  Model configuration standardized for MVP delivery:
+  - COMMITTED MVP MODEL STACK: Qwen3-Embedding-8B (English), bge-m3 (Thai/Mixed), Gemini 2.5 Pro/Flash (Generation)
+  - Language-specific embedding models with clear performance boundaries
+  - Qwen3 series standardized naming (no qwen2.5 references)  
+  - Structural chunking using MarkdownHeaderTextSplitter for contextually complete chunks
+  - Dual-pass automated quality scoring using Validator Agent with independent LLM evaluation
+  - Required Langfuse observability for all generation and validation operations
+  - Reranking disabled for MVP but language-specific ready for post-MVP
+  - English-first approach with proper Thai language support
+  - Advanced features explicitly deferred to post-MVP

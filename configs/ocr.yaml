@@ -1,0 +1,195 @@
+# OCR Configuration for Hybrid Chunking Pipeline
+# Tesseract and image processing settings
+
+ocr:
+  # Tesseract OCR Engine Configuration
+  tesseract:
+    # Tesseract command path (system-dependent)
+    command: "tesseract"  # Default system path
+    
+    # Language models to use
+    languages:
+      - "eng"  # English
+      - "tha"  # Thai
+    
+    # OCR Engine Modes (Tesseract documentation)
+    page_segmentation_mode: 3   # Fully automatic page segmentation, but no OSD
+    ocr_engine_mode: 3          # Default, based on what is available (LSTM + Legacy)
+    
+    # Quality and confidence thresholds
+    minimum_confidence: 60      # Skip text below this confidence (0-100)
+    word_confidence_threshold: 30  # Minimum confidence for individual words
+    
+    # Custom configuration string for fine-tuning
+    custom_config: "--psm 3 --oem 3"
+    
+    # Character whitelist (helps reduce OCR errors)
+    whitelist_chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,!?;:()[]{}\"'-/กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาิีึืุูเแโใไๅๆ็่้๊๋์ "
+    
+  # Image Preprocessing Configuration
+  image_preprocessing:
+    # Enable/disable preprocessing steps
+    enabled: true
+    
+    # PDF to image conversion
+    pdf_conversion:
+      dpi: 300                    # Resolution for PDF to image conversion
+      format: "PNG"               # Image format (PNG, JPEG)
+      
+    # Basic preprocessing
+    grayscale_conversion: true    # Convert to grayscale
+    noise_reduction: true         # Apply Gaussian blur for noise reduction
+    sharpening: true             # Apply sharpening filter
+    contrast_enhancement: true    # Enhance contrast for better recognition
+    
+    # Advanced preprocessing (applied conditionally)
+    advanced_preprocessing:
+      enabled: true
+      
+      # Morphological operations
+      morphological_operations: true
+      erosion_kernel_size: 1
+      dilation_kernel_size: 1
+      
+      # Adaptive thresholding
+      adaptive_thresholding: true
+      block_size: 11
+      c_value: 2
+      
+      # Image enhancement thresholds
+      apply_when_width_less_than: 1500
+      apply_when_height_less_than: 2000
+      
+    # Quality assessment for preprocessing decision
+    quality_assessment:
+      enabled: true
+      low_quality_threshold: 70   # Apply advanced preprocessing if OCR confidence < this
+
+  # Performance and resource management
+  performance:
+    # Processing limits
+    max_concurrent_pages: 3       # Maximum pages to process concurrently
+    processing_timeout_seconds: 180  # Timeout per page
+    
+    # Memory management
+    max_image_size_mb: 50         # Maximum image size to process
+    temp_directory: "/tmp/ocr"    # Temporary directory for image files
+    cleanup_temp_files: true      # Clean up temporary files after processing
+    
+    # Retry configuration
+    retry_attempts: 2             # Number of retry attempts for failed OCR
+    retry_delay_seconds: 5        # Delay between retry attempts
+
+# Agentic Chunking Configuration
+agentic_chunking:
+  # Gemini Flash model configuration
+  model:
+    name: "gemini-2.5-flash"
+    max_tokens: 8000              # Maximum tokens per API request
+    temperature: 0.1              # Low temperature for consistent chunking
+    
+  # Chunking parameters
+  chunking:
+    target_parent_chunk_size: 500 # Target words per parent chunk
+    max_parent_chunk_size: 800    # Maximum words per parent chunk
+    min_parent_chunk_size: 200    # Minimum words per parent chunk
+    
+    max_child_chunks_per_parent: 10  # Maximum child chunks per parent
+    
+  # Quality control
+  quality:
+    min_chunk_confidence: 0.75    # Minimum confidence score for chunks
+    coverage_threshold: 0.85      # Minimum coverage ratio (content preserved)
+    
+  # Processing control
+  processing:
+    max_retries: 3                # Maximum retry attempts for API failures
+    timeout_seconds: 120          # Timeout for API requests
+    batch_processing: false       # Process pages individually for better control
+    
+    # Fallback strategy
+    fallback_to_simple_splitting: true  # Fallback to rule-based if AI fails
+    fallback_chunk_size: 400      # Chunk size for fallback method
+
+# Document Analysis Configuration
+document_analysis:
+  # Sampling strategy for large documents
+  sampling:
+    max_pages_to_analyze: 5       # Maximum pages to sample for analysis
+    always_include_first_last: true  # Always analyze first and last pages
+    
+  # Classification thresholds
+  classification:
+    native_threshold: 0.8         # Ratio of pages with text for "native" classification
+    mixed_threshold: 0.3          # Below this = scanned, above native_threshold = native
+    
+    min_text_length: 50           # Minimum characters to consider "has text"
+    min_meaningful_words: 5       # Minimum words for meaningful text
+    
+  # Text quality assessment
+  quality_assessment:
+    # Character distribution checks
+    min_vowel_ratio: 0.2          # Minimum vowel/consonant ratio for valid text
+    max_vowel_ratio: 0.6          # Maximum vowel/consonant ratio for valid text
+    
+    # Readability scoring weights
+    sentence_structure_weight: 0.3
+    capitalization_weight: 0.2
+    punctuation_weight: 0.15
+    char_distribution_weight: 0.15
+    length_appropriateness_weight: 0.2
+
+# Monitoring and Logging
+monitoring:
+  # OCR metrics tracking
+  ocr_metrics:
+    track_confidence_distribution: true
+    track_processing_times: true
+    track_preprocessing_effectiveness: true
+    
+  # Cost tracking
+  cost_tracking:
+    track_gemini_api_usage: true
+    monthly_budget_alert_usd: 100
+    cost_per_1k_tokens: 0.002     # Approximate cost for Gemini Flash
+    
+  # Performance monitoring
+  performance_monitoring:
+    log_slow_pages_threshold_seconds: 60
+    alert_on_low_confidence_ratio: 0.3  # Alert if >30% pages have low confidence
+    
+  # Quality monitoring
+  quality_monitoring:
+    track_chunk_quality_scores: true
+    alert_on_quality_degradation: true
+    min_acceptable_quality: 0.6
+
+# Environment-specific overrides
+environments:
+  development:
+    ocr:
+      tesseract:
+        minimum_confidence: 50    # Lower threshold for testing
+      performance:
+        max_concurrent_pages: 1   # Limit concurrency for development
+    monitoring:
+      cost_tracking:
+        monthly_budget_alert_usd: 20  # Lower budget for dev
+  
+  staging:
+    ocr:
+      performance:
+        max_concurrent_pages: 2   # Moderate concurrency for staging
+    monitoring:
+      cost_tracking:
+        monthly_budget_alert_usd: 50  # Medium budget for staging
+  
+  production:
+    ocr:
+      performance:
+        max_concurrent_pages: 5   # Higher concurrency for production
+      tesseract:
+        minimum_confidence: 70    # Higher quality threshold
+    monitoring:
+      performance_monitoring:
+        log_slow_pages_threshold_seconds: 45  # Stricter performance monitoring

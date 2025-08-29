@@ -1,0 +1,65 @@
+# Development Environment Configuration
+# This file contains non-sensitive configuration values for development
+
+environment: development
+debug: true
+app_name: "LOs Generation Pipeline"
+version: "1.0.0"
+
+# Development-specific settings
+force_https: false
+api_rate_limit_per_minute: 200
+api_rate_limit_per_hour: 5000
+database_pool_size: 10
+max_concurrent_jobs: 5
+log_level: "DEBUG"
+
+# CORS settings for development
+cors_origins:
+  - "http://localhost:3000"
+  - "http://127.0.0.1:3000"
+  - "http://localhost:8000"
+  - "http://127.0.0.1:8000"
+
+# Allowed hosts
+allowed_hosts:
+  - "localhost"
+  - "127.0.0.1"
+
+# Processing configuration
+chunk_size: 1000
+overlap_size: 200
+max_retrieval_chunks: 20
+top_k_retrieval: 10
+
+# Model configuration
+default_embedding_model: "bge-m3"
+english_embedding_model: "qwen/qwen3-embedding-8b"
+thai_reranker_model: "bge-reranker-v2-m3"
+english_reranker_model: "qwen/qwen3-reranker-8b"
+
+# Directory paths (relative to project root)
+config_dir: "configs"
+input_data_dir: "input_data"
+output_data_dir: "output_data"
+logs_dir: "logs"
+
+# Development database settings
+database_max_overflow: 20
+redis_max_connections: 10
+vector_dimension: 1024
+qdrant_collection_name: "los_chunks_dev"
+
+# Rate limiting settings
+default_rate_limit: 200
+rate_limit_period: 3600
+api_key_expiry_days: 365
+
+# Logging configuration
+log_format: "json"
+
+# Notes:
+# - Remember to set sensitive values in .env file:
+#   DATABASE_URL, REDIS_URL, QDRANT_URL, GEMINI_API_KEY, OLLAMA_URL, SECRET_KEY
+# - For development, you can use default passwords but change them for staging/production
+# - Make sure all required services are running locally

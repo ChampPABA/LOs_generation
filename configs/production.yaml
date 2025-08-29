@@ -1,0 +1,84 @@
+# Production Environment Configuration
+# This file contains non-sensitive configuration values for production
+# All sensitive values should be set via environment variables
+
+environment: production
+debug: false
+app_name: "LOs Generation Pipeline"
+version: "1.0.0"
+
+# Production security settings
+force_https: true
+api_rate_limit_per_minute: 60
+api_rate_limit_per_hour: 1000
+database_pool_size: 20
+database_max_overflow: 30
+max_concurrent_jobs: 10
+log_level: "WARNING"
+
+# Security configuration
+cors_origins:
+  - "https://yourdomain.com"  # Replace with your actual domain
+  - "https://app.yourdomain.com"  # Replace with your actual domain
+
+allowed_hosts:
+  - "yourdomain.com"  # Replace with your actual domain
+  - "app.yourdomain.com"  # Replace with your actual domain
+
+# Processing configuration (optimized for production)
+chunk_size: 1000
+overlap_size: 200
+max_retrieval_chunks: 15  # Lower for performance
+top_k_retrieval: 8        # Lower for performance
+
+# Model configuration
+default_embedding_model: "bge-m3"
+english_embedding_model: "qwen/qwen3-embedding-8b"
+thai_reranker_model: "bge-reranker-v2-m3"
+english_reranker_model: "qwen/qwen3-reranker-8b"
+
+# Directory paths (absolute paths recommended for production)
+config_dir: "/app/configs"
+input_data_dir: "/app/data/input"
+output_data_dir: "/app/data/output"
+logs_dir: "/app/logs"
+
+# Redis and vector database settings
+redis_max_connections: 20  # Higher for production
+vector_dimension: 1024
+qdrant_collection_name: "los_chunks_prod"
+
+# Rate limiting settings (conservative for production)
+default_rate_limit: 100
+rate_limit_period: 3600
+api_key_expiry_days: 90  # Shorter expiry for security
+
+# Logging configuration
+log_format: "json"
+
+# Production deployment checklist:
+# ✓ Set ENVIRONMENT=production
+# ✓ Configure production database with strong credentials
+# ✓ Set up SSL certificates (SSL_CERT_PATH, SSL_KEY_PATH)
+# ✓ Generate secure SECRET_KEY (32+ characters)
+# ✓ Configure specific CORS_ORIGINS (no wildcards)
+# ✓ Set up production Redis instance
+# ✓ Set up production Qdrant instance
+# ✓ Validate Gemini API key and quotas
+# ✓ Configure Ollama models for production
+# ✓ Set up monitoring and health checks
+# ✓ Configure backup strategies
+# ✓ Set up log aggregation
+# ✓ Review and test circuit breaker configurations
+
+# Required environment variables for production:
+# DATABASE_URL - PostgreSQL connection string with strong credentials
+# REDIS_URL - Redis connection string
+# QDRANT_URL - Qdrant vector database URL
+# GEMINI_API_KEY - Google Gemini API key
+# OLLAMA_URL - Ollama service URL
+# SECRET_KEY - Secure secret key (32+ characters)
+# SSL_CERT_PATH - Path to SSL certificate
+# SSL_KEY_PATH - Path to SSL private key
+# LANGFUSE_PUBLIC_KEY - (Optional) Langfuse public key
+# LANGFUSE_SECRET_KEY - (Optional) Langfuse secret key
